@@ -65,7 +65,7 @@ export default definePlugin({
     async start() {
         await update();
         if (settings.store.update.valueOf() && settings.store.howOften.valueOf() > 0) {
-            setTimeout(async () => {
+            setInterval(async () => {
                 await update();
             }, settings.store.howOften.valueOf() * 1000);
         }
