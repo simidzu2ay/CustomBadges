@@ -8,7 +8,7 @@ import { addBadge, BadgePosition, ProfileBadge } from "@api/Badges";
 import definePlugin from "@utils/types";
 
 const fetchBadges = async (): Promise<Record<string, { name: string, image: string; }[]>> => {
-    const result = await fetch("https://raw.githubusercontent.com/simidzu2ay/CustomBadges/main/data.json");
+    const result = await fetch("https://raw.githubusercontent.com/simidzu2ay/storage/main/custom-badges.json");
     return await result.json();
 };
 
