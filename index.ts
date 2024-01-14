@@ -8,22 +8,14 @@ import { addBadge, BadgePosition, ProfileBadge } from "@api/Badges";
 import definePlugin from "@utils/types";
 
 const fetchBadges = async (): Promise<Record<string, { name: string, image: string; }[]>> => {
-
-    // const result = await fetch("https://textbin.net/raw/q9hpnnh0gg");
-    // return await result.json();
-    return {
-        "279266228151779329": [{
-            name: "Husk",
-            image: "https://cdn.discordapp.com/emojis/1192196285697097821.webp"
-        }]
-    };
+    const result = await fetch("https://raw.githubusercontent.com/simidzu2ay/CustomBadges/main/data.json");
+    return await result.json();
 };
 
 const applyBadges = (badges: Awaited<ReturnType<typeof fetchBadges>>) => {
     for (const [userId, bdgs] of Object.entries(badges)) {
         for (const badge of bdgs) {
-            const badgeInfo: ProfileBadge =
-            {
+            const badgeInfo: ProfileBadge = {
                 image: badge.image,
                 description: badge.name,
                 position: BadgePosition.END,
@@ -41,7 +33,6 @@ const applyBadges = (badges: Awaited<ReturnType<typeof fetchBadges>>) => {
 export default definePlugin({
     name: "CustomBadges",
     description: "Allow to see custom badges",
-    dependencies: ["BadgeAPI"],
     authors: [
         {
             id: 279266228151779329n,
@@ -52,6 +43,5 @@ export default definePlugin({
         fetchBadges().then(badges => {
             return applyBadges(badges);
         });
-
     }
 });
