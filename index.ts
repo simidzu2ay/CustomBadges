@@ -13,41 +13,8 @@ const fetchBadges = async (): Promise<Record<string, { name: string, image: stri
     return await result.json();
 };
 
-const forEachBadge = (badges: Awaited<ReturnType<typeof fetchBadges>>, callback: (badge: ProfileBadge) => any) => {
-    for (const [userId, bdgs] of Object.entries(badges)) {
-        for (const badge of bdgs) {
-            const badgeInfo: ProfileBadge = {
-                image: badge.image,
-                description: badge.name,
-                position: BadgePosition.END,
-                shouldShow(userInfo) {
-                    return userInfo.user.id === userId;
-                },
-            };
 
-            callback(badgeInfo);
-        }
-    }
-};
-
-const applyBadges = (badges: Awaited<ReturnType<typeof fetchBadges>>) => {
-    for (const [userId, bdgs] of Object.entries(badges)) {
-        for (const badge of bdgs) {
-            const badgeInfo: ProfileBadge = {
-                image: badge.image,
-                description: badge.name,
-                position: BadgePosition.END,
-                shouldShow(userInfo) {
-                    return userInfo.user.id === userId;
-                },
-            };
-
-
-            addBadge(badgeInfo);
-        }
-    }
-};
-
+type Badges = Awaited<ReturnType<typeof fetchBadges>>;
 
 const settings = definePluginSettings({
     update: {
@@ -64,6 +31,28 @@ const settings = definePluginSettings({
     }
 });
 
+const toBadgeInfo = (badges: Badges) => {
+    const profileBadges: ProfileBadge[] = [];
+
+    for (const [userId, bdgs] of Object.entries(badges)) {
+        for (const badge of bdgs) {
+            const badgeInfo: ProfileBadge = {
+                image: badge.image,
+                description: badge.name,
+                position: BadgePosition.END,
+                shouldShow(userInfo) {
+                    return userInfo.user.id === userId;
+                },
+            };
+
+            profileBadges.push(badgeInfo);
+
+        }
+    }
+
+    return profileBadges;
+};
+
 export default definePlugin({
     name: "CustomBadges",
     description: "Allow to see custom badges",
@@ -75,13 +64,14 @@ export default definePlugin({
         }
     ],
     async start() {
-        let badges = await fetchBadges();
-        forEachBadge(badges, addBadge);
+        let badges = toBadgeInfo(await fetchBadges());
+        badges.forEach(addBadge);
+
         if (settings.store.update.valueOf() && settings.store.howOften.valueOf() > 0) {
             setInterval(async () => {
-                forEachBadge(badges, removeBadge);
-                badges = await fetchBadges();
-                forEachBadge(badges, addBadge);
+                badges.forEach(removeBadge);
+                badges = toBadgeInfo(await fetchBadges());
+                badges.forEach(addBadge);
             }, settings.store.howOften.valueOf() * 1000);
         }
     }
